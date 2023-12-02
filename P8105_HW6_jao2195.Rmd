@@ -245,15 +245,80 @@ In this problem, you will analyze data gathered to understand the effects of sev
 Load and clean the data for regression analysis <br> 
 (i.e. convert numeric to factor where appropriate, check for missing data, etc.).
 
+```{r message=FALSE}
+#Loading in Dataset, Birthweight 
+birthweight <-read_csv("data/birthweight.csv")
+
+birthweight <- birthweight |> #Overwritting dataset
+        janitor::clean_names()
+      
+change_to_factor <- c("babysex", "frace", "malform", "mrace")
+
+#Change to Factor 
+birthweight_cleaned <- birthweight |>
+                      mutate(across(all_of(change_to_factor), as.factor))
+
+class(birthweight_cleaned$babysex)
+
+# Checking the Factors Factored Appropriately 
+# levels(birthweight_cleaned$babysex)
+# levels(birthweight_cleaned$frace)
+# levels(birthweight_cleaned$mrace)
+# levels(birthweight_cleaned$malform)
+
+#Checking Missing Data 
+
+any_NA <- any(is.na(birthweight_cleaned))
+
+if (any_NA) {
+  print("There is missing data in the dataset.")
+} else {
+  print("There is no missing data in the dataset.")
+}
+
+#The birthweight_cleaned dataset is now ready for regression analysis. 
+```
 **3B** 
-Model 1: Propose a regression model for birthweight. This model may be based on a hypothesized structure for the factors that underly birthweight, on a data-driven model-building process, or a combination of the two. Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot.
+**Model 1:** Propose a regression model for birthweight. 
+
+This model may be based on a hypothesized structure for the factors that underly birthweight, on a data-driven model-building process, or a combination of the two. 
+
+Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot.
+
+```{r}
+#My Proposed Birthweight Model: 
+my_proposed_bw_model1 = lm(bwt ~ mrace + parity + gaweeks + smoken + momage,  data = birthweight_cleaned)
+
+
+#Plot of Model of Residuals against fitted 
+```
+
+**### Description of Modeling Process**
+### Step 1) For my modeling process, I considered potential covariates that may most likely play a 
+#significant role in the birthweight of the child. From my own understanding of biology and som research, the covariates that I fould to most likely effect a childs bithweight was the following: `mrace` , `parity`, `gaweeks`, `smoken`, `momage`. The other covariates my place a role, but these were slected as highly likely to impact birthwaeigh, our outcome of interest. 
 
 Compare your model (Model 1) to two others (Model 2 and Model 3 below) :
+**Model 2:** One using length at birth and gestational age as predictors (main effects only).
 
-Model 2: One using length at birth and gestational age as predictors (main effects only).
-Model 3: One using head circumference, length, sex, and all interactions (including the three-way interaction) between these. 
+```{r}
+comparison_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
+```
+
+
+**Model 3:** One using head circumference, length, sex, and all interactions (including the three-way interaction) between these.
+```{r}
+comparision_model_3= lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex +blength*babysex + bhead*blength*babysex, data =  birthweight_cleaned)
+```
 
 Make this comparison in terms of the cross-validated prediction error; use crossv_mc and functions in purrr as appropriate.
 Note that although we expect your model to be reasonable, model building itself is not a main idea of the course and we don’t necessarily expect your model to be “optimal”.
 
+```{r}
+
+```
+
+
+################################################################################
+############# END OF HOMEWORK 6  ###############################################
+################################################################################
 
