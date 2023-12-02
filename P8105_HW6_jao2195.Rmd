@@ -1,5 +1,5 @@
 ---
-title: "Homework Assignemnt 6 (P8105_HW6_jao2195)"
+title: "Homework Assignemnt 6 <br> (P8105_HW6_jao2195)"
 author: "Jennifer Osei <br>"
 date: '`r format(Sys.time(), "%A %B %d, %Y")`'
 output: github_document
@@ -36,12 +36,14 @@ library(modelr)
 
 Background: The Washington Post has gathered data on homicides in 50 large U.S. cities and made the data available through a GitHub repository here. You can read their accompanying article here.
 
-**1A**
-1aQ. Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved. Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake. For this problem, limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
+**1A** <br>
+**1aQ.**
+Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved. Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake. For this problem, limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
 
-1aA.In the data cleaning code below we create a `city_state` variable, change `victim_age` to numeric, modifiy victim_race to have categories white and non-white, with white as the reference category, and create a `resolution` variable indicating whether the homicide is solved. Lastly, we filtered out the following cities: Tulsa, AL; Dallas, TX; Phoenix, AZ; and Kansas City, MO; and we retained only the variables `city_state`, `resolution`, `victim_age`, `victim_sex`, and `victim_race`.
+**1aA.**
+In the data cleaning code below we create a `city_state` variable, change `victim_age` to numeric, modifiy victim_race to have categories white and non-white, with white as the reference category, and create a `resolution` variable indicating whether the homicide is solved. Lastly, we filtered out the following cities: Tulsa, AL; Dallas, TX; Phoenix, AZ; and Kansas City, MO; and we retained only the variables `city_state`, `resolution`, `victim_age`, `victim_sex`, and `victim_race`.
 
-1aC. 
+**1aC.**
 ```{r q1_data_cleaning}
 homicide_df = 
   read_csv("data/homicide-data.csv", na = c("", "NA", "Unknown")) |> 
@@ -58,12 +60,14 @@ homicide_df =
   select(city_state, resolution, victim_age, victim_sex, victim_race)
 ```
 
-**1B**
-1bQ. For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors. Save the output of glm as an R object; apply the broom::tidy to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
+**1B** <br> 
+**1bQ.** 
+For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors. Save the output of glm as an R object; apply the broom::tidy to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
 
-1bA. Next we fit a logistic regression model using only data from Baltimore, MD. We model `resolved` as the outcome and `victim_age`, `victim_sex`, and `victim_race` as predictors. We save the output as `baltimore_glm` so that we can apply `broom::tidy` to this object and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing non-white victims to white victims.
+**1bA.** 
+Next we fit a logistic regression model using only data from Baltimore, MD. We model `resolved` as the outcome and `victim_age`, `victim_sex`, and `victim_race` as predictors. We save the output as `baltimore_glm` so that we can apply `broom::tidy` to this object and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing non-white victims to white victims.
 
-1bC.
+**1bC.**
 ```{r q1_glm_baltimore}
 baltimore_glm = 
   filter(homicide_df, city_state == "Baltimore, MD") |> 
@@ -80,12 +84,14 @@ baltimore_glm |>
   knitr::kable(digits = 3)
 ```
 
-**1C**
-1cQ. Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city.
+**1C** <br>
+**1cQ.** 
+Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city.
 
-1cA. Below, by incorporating `nest()`, `map()`, and `unnest()` into the preceding Baltimore-specific code, we fit a model for each of the cities, and extract the adjusted odds ratio (and CI) for solving homicides comparing non-white victims to white victims. We show the first 5 rows of the resulting dataframe of model results.
+**1cA.** 
+Below, by incorporating `nest()`, `map()`, and `unnest()` into the preceding Baltimore-specific code, we fit a model for each of the cities, and extract the adjusted odds ratio (and CI) for solving homicides comparing non-white victims to white victims. We show the first 5 rows of the resulting dataframe of model results.
 
-1cC.
+**1cC.**
 ```{r q1_glm_all_cities}
 model_results = 
   homicide_df |> 
@@ -108,29 +114,61 @@ model_results |>
   knitr::kable(digits = 3)
 ```
 
-**1D**
-1dQ. Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot.
+**1D** <br> 
+**1dQ.**
+Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot.
 
-1dA. Below we generate a plot of the estimated ORs and CIs for each city, ordered by magnitude of the OR from smallest to largest. From this plot we see that most cities have odds ratios that are smaller than 1, suggesting that crimes with male victims have smaller odds of resolution compared to crimes with female victims after adjusting for victim age and race. This disparity is strongest in New yrok. In roughly half of these cities, confidence intervals are narrow and do not contain 1, suggesting a significant difference in resolution rates by sex after adjustment for victim age and race. 
+**1dA.**
+Below we generate a plot of the estimated ORs and CIs for each city, ordered by magnitude of the OR from smallest to largest. From this plot we see that most cities have odds ratios that are smaller than 1, suggesting that crimes with male victims have smaller odds of resolution compared to crimes with female victims after adjusting for victim age and race. This disparity is strongest in New yrok. In roughly half of these cities, confidence intervals are narrow and do not contain 1, suggesting a significant difference in resolution rates by sex after adjustment for victim age and race. 
 
-1dC.
+**1dC.**
 ```{r q1_plot}
-my_plot = model_results |> 
+Model_Results = model_results |> 
   mutate(city_state = fct_reorder(city_state, OR)) |> 
   ggplot(aes(x = city_state, y = OR)) + 
   geom_point() + 
   geom_errorbar(aes(ymin = OR_CI_lower, ymax = OR_CI_upper)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+#Added ggsave to organize files and store problem output plots in a folder. 
 ggsave("plots/Problem_1_Model_Results.png", 
-        plot = my_longtitudinal_plot, device = "png", width = 10, height = 6, dpi = 300)
+        plot = Model_Results, device = "png", width = 10, height = 6, dpi = 300)
 
+Model_Results
 ```
 
 ################################################################################
 ### Problem 2 ##################################################################
 ################################################################################
 
+For this problem, we’ll use the Central Park weather data similar to data we’ve seen elsewhere. The code chunk below (adapted from the course website) will download these data.
+
+```{r message=FALSE}
+#Downloading data needed for Problem 2: Central Park Weather Data.
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2022-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) |>
+  select(name, id, everything())
+```
+
+The boostrap is helpful when you’d like to perform inference for a parameter / value / summary that doesn’t have an easy-to-write-down distribution in the usual repeated sampling framework. We’ll focus on a simple linear regression with tmax as the response with tmin and prcp as the predictors, and are interested in the distribution of two quantities estimated from these data:
+
+**Quantity 1: r^2**
+
+**Quantity 2: log(β̂ 1∗β̂ 2)**
+
+Use 5000 bootstrap samples and, for each bootstrap sample, produce estimates of these two quantities. Plot the distribution of your estimates, and describe these in words. Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for r̂ 2
+ and log(β̂ 0∗β̂ 1)
+. Note: broom::glance() is helpful for extracting r̂ 2
+ from a fitted regression, and broom::tidy() (with some additional wrangling) should help in computing log(β̂ 1∗β̂ 2)
+.
 
 ################################################################################
 ### Problem 3 ##################################################################
