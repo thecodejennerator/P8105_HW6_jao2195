@@ -1,0 +1,49 @@
+---
+title: "Homework Assignemnt 6 (P8105_HW6_jao2195)"
+author: "Jennifer Osei <br>"
+date: '`r format(Sys.time(), "%A %B %d, %Y")`'
+output: github_document
+---
+################################################################################
+### Problem 0 ##################################################################
+################################################################################
+Problem 0
+This “problem” focuses on structure of your submission, especially the use git and GitHub for reproducibility, R Projects to organize your work, R Markdown to write reproducible reports, relative paths to load data from local files, and reasonable naming structures for your files. 
+
+To that end:
+-Create a public GitHub repo + local R Project; we suggest naming this repo / directory p8105_hw6_YOURUNI (e.g. p8105_hw6_ajg2202 for Jeff), but that’s not required
+
+-Create a single .Rmd file named p8105_hw6_YOURUNI.Rmd that renders to github_document
+create a subdirectory to store the local data files used in the assignment, and use relative paths to access these data files submit a link to your repo via Courseworks
+
+Your solutions to Problems 1 and 2 should be implemented in your .Rmd file, and your git commit history should reflect the process you used to solve these Problems.
+
+For this Problem, we will assess adherence to the instructions above regarding repo structure, git commit history, and whether we are able to knit your .Rmd to ensure that your work is reproducible. Adherence to appropriate styling and clarity of code will be assessed in Problems 1+ using the style rubric.
+
+This homework includes figures; the readability of your embedded plots (e.g. font sizes, axis labels, titles) will be assessed in Problems 1+.
+
+```{r, message=FALSE}
+#Needed libaries
+library(tidyverse)
+library(readr)
+library(ggplot2)
+```
+
+################################################################################
+### Problem 1 ##################################################################
+################################################################################
+
+
+################################################################################
+### Problem 2 ##################################################################
+################################################################################
+
+
+################################################################################
+### Problem 3 ##################################################################
+################################################################################
+
+
+################################################################################
+### Problem 4 ##################################################################
+################################################################################
