@@ -24,10 +24,24 @@ This homework includes figures; the readability of your embedded plots (e.g. fon
 
 ```{r, message=FALSE}
 #Needed libaries
+
+# install.packages("tidyverse")
+# install.packages("magrittr)")
+# install.packages("readr")
+# install.packages("ggplot2")
+# install.packages("modelr")
+# install.packages("boot")
+# install.packages("MASS")
+# install.packages("broom")
+
 library(tidyverse)
+library(magrittr)
 library(readr)
 library(ggplot2)
 library(modelr)
+library(boot)
+library(MASS)
+library(broom)
 ```
 
 ################################################################################
@@ -36,17 +50,17 @@ library(modelr)
 
 Background: The Washington Post has gathered data on homicides in 50 large U.S. cities and made the data available through a GitHub repository here. You can read their accompanying article here.
 
-**1A** <br>
-**1aQ.**
-Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved. Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake. For this problem, limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
-
-**1aA.**
+**1A** 
+**1aA**
 In the data cleaning code below we create a `city_state` variable, change `victim_age` to numeric, modifiy victim_race to have categories white and non-white, with white as the reference category, and create a `resolution` variable indicating whether the homicide is solved. Lastly, we filtered out the following cities: Tulsa, AL; Dallas, TX; Phoenix, AZ; and Kansas City, MO; and we retained only the variables `city_state`, `resolution`, `victim_age`, `victim_sex`, and `victim_race`.
 
-**1aC.**
-```{r q1_data_cleaning}
+**1aQ**
+Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved. Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake. For this problem, limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
+
+**1aC**
+```{r}
 homicide_df = 
-  read_csv("data/homicide-data.csv", na = c("", "NA", "Unknown")) |> 
+  read_csv("data/homicide-data.csv", na = c("", "NA", "Unknown")) |>
   mutate(
     city_state = str_c(city, state, sep = ", "),
     victim_age = as.numeric(victim_age),
@@ -54,21 +68,24 @@ homicide_df =
       disposition == "Closed without arrest" ~ 0,
       disposition == "Open/No arrest"        ~ 0,
       disposition == "Closed by arrest"      ~ 1)
-  ) |> 
+  ) |>
   filter(victim_race %in% c("White", "Black")) |> 
   filter(!(city_state %in% c("Tulsa, AL", "Dallas, TX", "Phoenix, AZ", "Kansas City, MO"))) |> 
   select(city_state, resolution, victim_age, victim_sex, victim_race)
 ```
 
-**1B** <br> 
-**1bQ.** 
+
+
+
+**1B** 
+**1bQ** 
 For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors. Save the output of glm as an R object; apply the broom::tidy to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
 
 **1bA.** 
 Next we fit a logistic regression model using only data from Baltimore, MD. We model `resolved` as the outcome and `victim_age`, `victim_sex`, and `victim_race` as predictors. We save the output as `baltimore_glm` so that we can apply `broom::tidy` to this object and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing non-white victims to white victims.
 
-**1bC.**
-```{r q1_glm_baltimore}
+**1bC**
+```{r}
 baltimore_glm = 
   filter(homicide_df, city_state == "Baltimore, MD") |> 
   glm(resolution ~ victim_age + victim_sex + victim_race, family = binomial(), data = _)
@@ -84,28 +101,28 @@ baltimore_glm |>
   knitr::kable(digits = 3)
 ```
 
-**1C** <br>
-**1cQ.** 
+**1C**
+**1cQ** 
 Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city.
 
-**1cA.** 
+**1cA** 
 Below, by incorporating `nest()`, `map()`, and `unnest()` into the preceding Baltimore-specific code, we fit a model for each of the cities, and extract the adjusted odds ratio (and CI) for solving homicides comparing non-white victims to white victims. We show the first 5 rows of the resulting dataframe of model results.
 
-**1cC.**
-```{r q1_glm_all_cities}
+**1cC**
+```{r}
 model_results = 
-  homicide_df |> 
-  nest(data = -city_state) |> 
+  homicide_df %>%  
+  nest(data = -city_state) %>% 
   mutate(
     models = map(data, \(df) glm(resolution ~ victim_age + victim_sex + victim_race, 
                              family = binomial(), data = df)),
-    tidy_models = map(models, broom::tidy)) |> 
-  select(-models, -data) |> 
-  unnest(cols = tidy_models) |> 
+    tidy_models = map(models, broom::tidy)) %>% 
+  select(-models, -data) %>%  
+  unnest(cols = tidy_models) %>%  
   mutate(
     OR = exp(estimate), 
     OR_CI_upper = exp(estimate + 1.96 * std.error),
-    OR_CI_lower = exp(estimate - 1.96 * std.error)) |> 
+    OR_CI_lower = exp(estimate - 1.96 * std.error)) %>% 
   filter(term == "victim_sexMale") |> 
   select(city_state, OR, OR_CI_lower, OR_CI_upper)
 
@@ -114,15 +131,15 @@ model_results |>
   knitr::kable(digits = 3)
 ```
 
-**1D** <br> 
-**1dQ.**
+**1D** 
+**1dQ**
 Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot.
 
-**1dA.**
+**1dA**
 Below we generate a plot of the estimated ORs and CIs for each city, ordered by magnitude of the OR from smallest to largest. From this plot we see that most cities have odds ratios that are smaller than 1, suggesting that crimes with male victims have smaller odds of resolution compared to crimes with female victims after adjusting for victim age and race. This disparity is strongest in New yrok. In roughly half of these cities, confidence intervals are narrow and do not contain 1, suggesting a significant difference in resolution rates by sex after adjustment for victim age and race. 
 
-**1dC.**
-```{r q1_plot}
+**1dC**
+```{r}
 Model_Results = model_results |> 
   mutate(city_state = fct_reorder(city_state, OR)) |> 
   ggplot(aes(x = city_state, y = OR)) + 
@@ -141,10 +158,13 @@ Model_Results
 ### Problem 2 ##################################################################
 ################################################################################
 
+**2** <br>
+
+**2a** <br> 
 For this problem, we’ll use the Central Park weather data similar to data we’ve seen elsewhere. The code chunk below (adapted from the course website) will download these data.
 
 ```{r message=FALSE}
-#Downloading data needed for Problem 2: Central Park Weather Data.
+#2a.Downloading data needed for Problem 2: Central Park Weather Data.
 weather_df = 
   rnoaa::meteo_pull_monitors(
     c("USW00094728"),
@@ -158,23 +178,56 @@ weather_df =
   select(name, id, everything())
 ```
 
-The boostrap is helpful when you’d like to perform inference for a parameter / value / summary that doesn’t have an easy-to-write-down distribution in the usual repeated sampling framework. We’ll focus on a simple linear regression with tmax as the response with tmin and prcp as the predictors, and are interested in the distribution of two quantities estimated from these data:
+**2b** <br> 
+The bootstrap is helpful when you’d like to perform inference for a parameter / value / summary that doesn’t have an easy-to-write-down distribution in the usual repeated sampling framework. We’ll focus on a simple linear regression with **tmax** as the response with **tmin** and **prcp** as the predictors, and are interested in the distribution of two quantities estimated from these data:
 
-**Quantity 1: r^2**
+**Quantity 1: r^2** <- Interested in producing r^2 distribution.
+**Quantity 2: log(β̂ 1∗β̂ 2)**<- Interested in producing log(β̂ 1∗β̂ 2) distribution as well. 
 
-**Quantity 2: log(β̂ 1∗β̂ 2)**
+1) Use 5000 bootstrap samples and, for each bootstrap sample, 2) produce estimates of these two quantities. 3) Plot the distribution of your estimates, and describe these in words. 4) Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for r̂^2 and log(β̂ 0∗β̂ 1)
 
-Use 5000 bootstrap samples and, for each bootstrap sample, produce estimates of these two quantities. Plot the distribution of your estimates, and describe these in words. Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for r̂ 2
- and log(β̂ 0∗β̂ 1)
-. Note: broom::glance() is helpful for extracting r̂ 2
- from a fitted regression, and broom::tidy() (with some additional wrangling) should help in computing log(β̂ 1∗β̂ 2)
-.
+**Note:** broom::glance() is helpful for extracting r̂^2 from a fitted regression, and
+broom::tidy() (with some additional wrangling) should help in computing log(β̂ 1∗β̂ 2).
 
+
+```{r}
+##Bootstrap Method 
+
+#weather_df (Dataset)
+#tmax (Outcome/Response (Y)) 
+#tmin & prcp (Predictor/Explanatory (X))
+
+# Define the function to extract the quantities of interest from the linear regression model
+boot_function <- function(weather_df, indices) {
+  bootstrap_data <- weather_df[indices, ]   # Subseting the data using the bootstrap indices
+  model <- lm(tmax ~ tmin + prcp, data = bootstrap_data)   # Fit the linear regression model 
+  r_squared <- summary(model)$r.squared # Quantity 1: R-squared
+  log_beta_product <- log(coef(model)["tmin"] * coef(model)["prcp"])# Quantity 2: log(beta1 * beta2)
+  return(c(r_squared, log_beta_product))
+}
+# Set the seed for reproducibility
+set.seed(123)
+
+# Number of bootstrap samples
+num_bootstrap_samples <- 5000
+
+# Perform the bootstrap
+bootstrap_results <- boot(data = weather_df, statistic = boot_function, R = num_bootstrap_samples)
+
+# Plot the distributions of the quantities of interest
+par(mfrow = c(1, 2))  # Create a 1x2 layout for two plots
+hist(bootstrap_results$t[, 1], main = "Distribution of R-squared", xlab = "R-squared")
+hist(bootstrap_results$t[, 2], main = "Distribution of log(beta1 * beta2)", xlab = "log(beta1 * beta2)")
+
+# Describe the distributions
+# You can use summary(bootstrap_results) to get summary statistics
+
+# Calculate 95% confidence intervals
+conf_intervals <- boot.ci(bootstrap_results, type = "bca", index = c(1, 2))
+conf_intervals
+
+```
 ################################################################################
 ### Problem 3 ##################################################################
 ################################################################################
 
-
-################################################################################
-### Problem 4 ##################################################################
-################################################################################
