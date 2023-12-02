@@ -115,12 +115,16 @@ model_results |>
 
 1dC.
 ```{r q1_plot}
-model_results |> 
+my_plot = model_results |> 
   mutate(city_state = fct_reorder(city_state, OR)) |> 
   ggplot(aes(x = city_state, y = OR)) + 
   geom_point() + 
   geom_errorbar(aes(ymin = OR_CI_lower, ymax = OR_CI_upper)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggsave("plots/Problem_1_Model_Results.png", 
+        plot = my_longtitudinal_plot, device = "png", width = 10, height = 6, dpi = 300)
+
 ```
 
 ################################################################################
