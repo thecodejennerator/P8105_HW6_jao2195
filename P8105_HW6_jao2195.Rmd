@@ -312,6 +312,7 @@ This dataset, available here, consists of roughly 4000 children and includes the
 `wtgain`: mother’s weight gain during pregnancy (pounds) <br>
 
 **Problem 3** 
+
 **Problem 3A** 
 Load and clean the data for regression analysis <br> 
 (i.e. convert numeric to factor where appropriate, check for missing data, etc.).
@@ -337,34 +338,38 @@ class(birthweight_cleaned$babysex)
 # levels(birthweight_cleaned$mrace)
 # levels(birthweight_cleaned$malform)
 
-#Checking Missing Data 
+#Checking Missing Data, No Missing Data
 
 any_NA <- any(is.na(birthweight_cleaned))
 
 if (any_NA) {print("There is missing data in the dataset.")
      } else {print("There is no missing data in the dataset.")
-     }
+  }
 
-#The birthweight_cleaned dataset is now ready for regression analysis. 
+# Now the birthweight_cleaned dataset, factors are updated, and there is no missing data. 
+# Dataset is now ready for regression analysis. 
 ```
-**3B** 
+**Problem 3B** 
 **Model 1:** Propose a regression model for birthweight. 
 
 This model may be based on a hypothesized structure for the factors that underly birthweight, on a data-driven model-building process, or a combination of the two. 
-(I chose to build model based on a hypothesized structure for the factors that underly birthweight in Model 1, below.)
+(**I chose to build model based on a hypothesized structure for the factors that underly birthweight in Model 1, below.**)
 
-Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot.
+**### Description of Modeling Process**
+For my modeling process, I considered potential covariates that may most likely play a 
+significant role in the birthweight of the child. From my own understanding of biology and some previous research, the covariates that I selected for my proposed model to most likely effect a child's birthweight was the following: `mrace` , `parity`, `gaweeks`, `smoken`, `momage`. The other covariates may play a role, but these were selected as highly likely to impact birthweight, our outcome of interest in this linear regression model proposal. 
+
+Describe your modeling process (**Description is above**) and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot (**Plot os generated below**):
 
 ```{r}
 #My Proposed Birthweight Model: 
 my_proposed_bw_model1 = lm(bwt ~ mrace + parity + gaweeks + smoken + momage, data = birthweight_cleaned)
 
-#Plot of Model of Residuals against fitted 
 #Old school way of looking at model
 summary(my_proposed_bw_model1)
 summary(my_proposed_bw_model1)$coef
 coef(my_proposed_bw_model1)
-fitted.values(my_proposed_bw_model1)
+#fitted.values(my_proposed_bw_model1) # Commented out; long output
 
 #New School way of looking at model
 my_proposed_bw_model1 |> 
@@ -379,7 +384,7 @@ my_proposed_bw_model1 |>
   dplyr::select(term, estimate, p.value) |> 
   knitr::kable(digits = 3)
   
-#Plot of Fitted regressed on Residuals 
+#Plot of Fitted regressed on Residuals – use add_predictions and add_residuals 
 birthweight_cleaned|>
   modelr::add_residuals(my_proposed_bw_model1) |> 
   modelr::add_predictions(my_proposed_bw_model1) |> 
@@ -388,17 +393,14 @@ birthweight_cleaned|>
   labs(title = "Residuals vs Fitted values",
        x = "Fitted values",
        y = "Residuals")
-
-
 ```
 
-**### Description of Modeling Process**
-### Step 1) For my modeling process, I considered potential covariates that may most likely play a 
-#significant role in the birthweight of the child. From my own understanding of biology and som research, the covariates that I fould to most likely effect a childs bithweight was the following: `mrace` , `parity`, `gaweeks`, `smoken`, `momage`. The other covariates my place a role, but these were slected as highly likely to impact birthwaeigh, our outcome of interest. 
 
-Compare your model (Model 1) to two others (Model 2 and Model 3 below) :
+**Problem 3C**
+
+Compare your model (Model 1- Proposed Hypothesized Model) to two others (Model 2 and Model 3 below):
+
 **Model 2:** One using length at birth and gestational age as predictors (main effects only).
-
 ```{r}
 comparision_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
 ```
@@ -409,12 +411,15 @@ comparision_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
 comparision_model_3= lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex +blength*babysex + bhead*blength*babysex, data =  birthweight_cleaned)
 ```
 
-**Cross Validation**
-Make this comparison in terms of the cross-validated prediction error; use `crossv_mc` and functions in purrr as appropriate.
-Note that although we expect your model to be reasonable, model building itself is not a main idea of the course and we don’t necessarily expect your model to be “optimal”.
+**Cross Validation (Needed for Comparision of Models 1, Model 2, Model 3) **
+Make this comparison in terms of the cross-validated prediction error; <br>
+use `crossv_mc` and functions in purrr as appropriate.
+Note that although we expect your model to be reasonable, <br>
+model building itself is not a main idea of the course and <br>
+we don’t necessarily expect your model to be “optimal”.
 
-```{r}
-#Creating Cross Validation for Models 
+```{r, warning=FALSE}
+#Creating Cross Validation for Models Above
 cv_df = 
   crossv_mc(birthweight_cleaned, 100) 
 
@@ -439,7 +444,7 @@ cv_df <-
   )
 
 
-# Producing Final Corss-Validated Models 
+# Producing Final Cross-Validated Models 
 # Displaying Plot of RMSE of 3 Cross-Validated Models 
 cv_df |> 
    dplyr::select(starts_with("rmse")) |> 
@@ -451,16 +456,18 @@ cv_df |>
     dplyr::mutate(model = fct_inorder(model)) |> 
     ggplot(aes(x = model, y = rmse)) + geom_violin()
 
+```
+###  **Comments on Model Comparisons**
+**Model 3** (The Three-Way Interaction) has the lowest RMSE (Root Mean Squares Error) of roughly 300, <br>
+whereas **Model 2** (The Main Effects Model) , has a RMSE of roughly 325  & **Model 1** (The Hypothesized Proposed Model by myself) <br>  has a RMSE of roughly 450. We know that generally, a model that has a overall lower RMSE in comparison with other models, is usually the better model. In this case, the third model **Model 3**  (The Three-Way Interaction) model seems to take into account additional factors in regards to the interactions <br> 
+between the covariates that significantly brings down the RMSE, relative to **Model 1** (The Hypothesized Proposed Model by myself) & **Model 2** (The Main Effects Model), as they do not take these interactions into consideration.  
 
-
-
-
+**Model 3** seems to be the better model of the 3 models created above. 
+I would select and proceed with **Model 3** (The Three-Way Interaction) based on these data.
 
 ########################
 ### END OF PROBLEM 3####
 ########################
-```
-
 
 ################################################################################
 ############# END OF HOMEWORK 6  ###############################################
