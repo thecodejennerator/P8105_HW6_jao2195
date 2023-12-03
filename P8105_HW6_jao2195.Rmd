@@ -127,6 +127,7 @@ Below we generate a plot of the estimated ORs and CIs for each city, ordered by 
 
 **1dC**
 ```{r}
+
 Model_Results = model_results |>
   mutate(city_state = fct_reorder(city_state, OR)) |>
   ggplot(aes(x = city_state, y = OR)) +
@@ -162,7 +163,7 @@ weather_df =
     name = recode(id, USW00094728 = "CentralPark_NY"),
     tmin = tmin / 10,
     tmax = tmax / 10) |>
-  select(name, id, everything())
+  dplyr::select(name, id, everything())
 ```
 
 **2b** <br> 
@@ -171,26 +172,74 @@ The bootstrap is helpful when you’d like to perform inference for a parameter 
 **Quantity 1: r^2** <- Interested in producing r^2 distribution. <br>
 **Quantity 2: log(β̂ 1xβ̂ 2)**<- Interested in producing log(β̂1xβ̂ 2) distribution as well. 
 
-1) Use 5000 bootstrap samples and, for each bootstrap sample, 2) produce estimates of these two quantities. 3) Plot the distribution of your estimates, and describe these in words. 4) Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for r̂^2 and log(β̂ 0xβ̂ 1)
+1) Use 5000 bootstrap samples and, for each bootstrap sample, 2) produce estimates of these two quantities. 3) Plot the distribution of your estimates, and describe these in words. 4) Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for r̂^2 and log(β̂1xβ̂2). <br>
 
 **Note:** broom::glance() is helpful for extracting r̂^2 from a fitted regression, and
 broom::tidy() (with some additional wrangling) should help in computing log(β̂ 1xβ̂ 2)
 
 ```{r warning=FALSE}
-##Bootstrap Method 
+## Bootstrap Methods 
 
-#weather_df (Dataset)
-#tmax (Outcome/Response (Y)) 
-#tmin & prcp (Predictor/Explanatory (X))
+# NOTES: TA in Discussion Board Stated that there was a TYPO in Problem 2. Should be b1b2 NOT b0b1. ~ Canvas 11/21/2023 ###
+# weather_df (Dataset)
+# tmax (Outcome/Response (Y)) 
+# tmin & prcp (Predictor/Explanatory (X))
 
+### Bootstrap Method 1 ######
+### Part 1 - R Squared ######
+r_squared = weather_df %>% 
+                 modelr::bootstrap(n = 5000) %>% 
+                 mutate(models = map(strap, ~lm(tmax ~ tmin + prcp, data = .x) ), 
+                        results = map(models, broom::glance)) %>% 
+                 dplyr::select(-models,-strap) %>% 
+                 unnest(results) 
+
+r_squared_plot =  r_squared %>% 
+                  ggplot(aes(x = r.squared)) + geom_density()
+
+r_squared_plot
+
+
+# Calculate 95% confidence interval for R^2
+ci_r_squared <- r_squared %>%
+                summarize(
+                ci_lower = quantile(r.squared, 0.025),
+                ci_upper = quantile(r.squared, 0.975)
+                )
+
+# Print the confidence interval
+ci_r_squared
+
+### Part 2 - Log B ######
+log_b1b2 = weather_df %>% 
+                modelr::bootstrap(n = 5000) %>% 
+                mutate(models = map(strap, ~lm(tmax ~ tmin + prcp, data = .x)),
+                results = map(models, broom::tidy)) %>% 
+                dplyr::select(-strap, -models) %>% 
+                unnest(results) %>% 
+                dplyr::select(id = `.id`, term, estimate) %>% 
+                pivot_wider(names_from = term, values_from = estimate) %>% 
+                rename(beta1 = tmin, beta2 = prcp) %>% 
+                mutate(log_b1b2 = log(beta1 * beta2)) 
+
+log_b1b2_plot = log_b1b2%>% 
+                ggplot(aes(x = log_b1b2)) + geom_density()
+
+log_b1b2_plot
+
+# Calculate 95% confidence intervals
+
+
+#### Bootstrap Method 2 ######
 # Define the function to extract the quantities of interest from the linear regression model
 boot_function <- function(weather_df, indices) {
-  bootstrap_data <- weather_df[indices, ]   # Subseting the data using the bootstrap indices
-  model <- lm(tmax ~ tmin + prcp, data = bootstrap_data)   # Fit the linear regression model 
-  r_squared <- summary(model)$r.squared # Quantity 1: R-squared
-  log_beta_product <- log(coef(model)["tmin"] * coef(model)["prcp"])# Quantity 2: log(beta1 * beta2)
-  return(c(r_squared, log_beta_product))
+                 bootstrap_data <- weather_df[indices, ]                            # Subsetting the data using the bootstrap indices
+                 model <- lm(tmax ~ tmin + prcp, data = bootstrap_data)              # Fit the linear regression model 
+                 r_squared <- summary(model)$r.squared                               # Quantity 1: R-squared
+                 log_beta_product <- log(coef(model)["tmin"] * coef(model)["prcp"])  # Quantity 2: log(beta1 * beta2)
+                 return(c(r_squared, log_beta_product))
 }
+
 
 # Set the seed for reproducibility
 set.seed(123)
@@ -343,19 +392,19 @@ library(broom)
 # # Generate predictions and residuals
 # predictions <- predict(your_model, newdata = your_data)
 # residuals <- residuals(your_model)
-
-# Combine predictions and residuals in a data frame
-plot_data <- data.frame(.fitted = predictions, .resid = resids)
-
-# Create the plot
-final_plot = ggplot(plot_data, aes(x = .fitted, y = .resid)) +
-  geom_point() +
-  geom_smooth(se = FALSE, method = "loess", color = "red") +
-  labs(title = "Residuals vs. Fitted Values",
-       x = "Fitted Values",
-       y = "Residuals")
-
-final_plot
+# 
+# # Combine predictions and residuals in a data frame
+# plot_data <- data.frame(.fitted = predictions, .resid = resids)
+# 
+# # Create the plot
+# final_plot = ggplot(plot_data, aes(x = .fitted, y = .resid)) +
+#   geom_point() +
+#   geom_smooth(se = FALSE, method = "loess", color = "red") +
+#   labs(title = "Residuals vs. Fitted Values",
+#        x = "Fitted Values",
+#        y = "Residuals")
+# 
+# final_plot
 
 ```
 
@@ -380,7 +429,7 @@ Make this comparison in terms of the cross-validated prediction error; use `cros
 Note that although we expect your model to be reasonable, model building itself is not a main idea of the course and we don’t necessarily expect your model to be “optimal”.
 
 ```{r}
-purrr::crossv_mc ()
+# purrr::crossv_mc ()
 
 
 ```
