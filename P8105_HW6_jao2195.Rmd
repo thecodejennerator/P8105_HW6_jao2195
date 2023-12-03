@@ -42,10 +42,10 @@ library(dplyr)
 Background: The Washington Post has gathered data on homicides in 50 large U.S. cities and made the data available through a GitHub repository here. You can read their accompanying article here.
 
 **Problem 1A** <br> 
-**1aQ**
+**Problem 1aQ**
 Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved. Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake. For this problem, limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
 
-**1aC**
+**Problem 1aC**
 ```{r message=FALSE, q1_data_cleaning}
 homicide_df =
   read_csv("data/homicide-data.csv", na = c("", "NA", "Unknown")) |>
@@ -62,18 +62,18 @@ homicide_df =
   dplyr::select(city_state, resolution, victim_age, victim_sex, victim_race)
 ```
 
-**1aA**
+**Problem 1aA**
 In the data cleaning code below we create a `city_state` variable, change `victim_age` to numeric, modifiy victim_race to have categories white and non-white, with white as the reference category, and create a `resolution` variable indicating whether the homicide is solved. Lastly, we filtered out the following cities: Tulsa, AL; Dallas, TX; Phoenix, AZ; and Kansas City, MO; and we retained only the variables `city_state`, `resolution`, `victim_age`, `victim_sex`, and `victim_race`.
 
 
 **Problem 1B**  <br> 
-**1bQ** 
+**Problem 1bQ** 
 For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors. Save the output of glm as an R object; apply the broom::tidy to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
 
-**1bA.** 
+**Problem 1bA.** 
 Next we fit a logistic regression model using only data from Baltimore, MD. We model `resolved` as the outcome and `victim_age`, `victim_sex`, and `victim_race` as predictors. We save the output as `baltimore_glm` so that we can apply `broom::tidy` to this object and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing non-white victims to white victims.
 
-**1bC**
+**Problem 1bC**
 ```{r}
 baltimore_glm =
   dplyr::filter(homicide_df, city_state == "Baltimore, MD") |>
@@ -91,13 +91,13 @@ baltimore_glm |>
 ```
 
 **Problem 1C** <br> 
-**1cQ** 
+**Problem 1cQ** 
 Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city.
 
-**1cA** 
+**Problem 1cA** 
 Below, by incorporating `nest()`, `map()`, and `unnest()` into the preceding Baltimore-specific code, we fit a model for each of the cities, and extract the adjusted odds ratio (and CI) for solving homicides comparing non-white victims to white victims. We show the first 5 rows of the resulting dataframe of model results.
 
-**1cC**
+**Problem 1cC**
 ```{r}
 model_results =
   homicide_df %>%
@@ -121,13 +121,13 @@ model_results |>
 ```
 
 **Problem 1D** <br>
-**1dQ** <br>
+**Problem 1dQ** <br>
 Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot.
 
-**1dA**
+**Problem 1dA**
 Below we generate a plot of the estimated ORs and CIs for each city, ordered by magnitude of the OR from smallest to largest. From this plot we see that most cities have odds ratios that are smaller than 1, suggesting that crimes with male victims have smaller odds of resolution compared to crimes with female victims after adjusting for victim age and race. This disparity is strongest in New yrok. In roughly half of these cities, confidence intervals are narrow and do not contain 1, suggesting a significant difference in resolution rates by sex after adjustment for victim age and race. 
 
-**1dC**
+**Problem 1dC**
 ```{r}
 
 Model_Results = model_results |>
@@ -211,6 +211,7 @@ r_squared_plot =  r_squared %>%                                                 
 # Displaying Bootstrapped R-Squared Plot in Knitted Document. (#3 Complete)
 r_squared_plot
 ```
+<br> 
 #### Desciption of R-Squared in Words (#3 Complete)
 
 The distribution of the R-Squared Bootstrapped Plot above looks generally mildly left skewed <br> 
@@ -261,7 +262,7 @@ log_b1b2_plot
 
 The distribution of the Log(b1b2) Bootstrapped Plot above looks generally very left skewed <br> 
 in its distribution. This plot looks even more left skewed than the previous R-Squared plot above. 
-The Log(b1b2) has a with a mean (average) value of Log(b1b2) of approximately -0.5.25. 
+The Log(b1b2) has a with a mean (average) value of Log(b1b2) of approximately -5.25. 
 
 
 ```{r}
@@ -286,7 +287,8 @@ knitr::kable(ci_log_b1b2, digits=3)
 ################################################################################
 ### Problem 3 ##################################################################
 ################################################################################
-In this problem, you will analyze data gathered to understand the effects of several variables on a child’s birthweight. This dataset, available here, consists of roughly 4000 children and includes the following variables:
+In this problem, you will analyze data gathered to understand the effects of several variables on a child’s birthweight. <br> 
+This dataset, available here, consists of roughly 4000 children and includes the following variables:
 
 `babysex`: baby’s sex (male = 1, female = 2) <br>
 `bhead`: baby’s head circumference at birth (centimeters) <br>
@@ -309,8 +311,8 @@ In this problem, you will analyze data gathered to understand the effects of sev
 `smoken`: average number of cigarettes smoked per day during pregnancy <br>
 `wtgain`: mother’s weight gain during pregnancy (pounds) <br>
 
-**3** 
-**3A** 
+**Problem 3** 
+**Problem 3A** 
 Load and clean the data for regression analysis <br> 
 (i.e. convert numeric to factor where appropriate, check for missing data, etc.).
 
@@ -339,11 +341,9 @@ class(birthweight_cleaned$babysex)
 
 any_NA <- any(is.na(birthweight_cleaned))
 
-if (any_NA) {
-  print("There is missing data in the dataset.")
-} else {
-  print("There is no missing data in the dataset.")
-}
+if (any_NA) {print("There is missing data in the dataset.")
+     } else {print("There is no missing data in the dataset.")
+     }
 
 #The birthweight_cleaned dataset is now ready for regression analysis. 
 ```
@@ -360,7 +360,6 @@ Describe your modeling process and show a plot of model residuals against fitted
 my_proposed_bw_model1 = lm(bwt ~ mrace + parity + gaweeks + smoken + momage, data = birthweight_cleaned)
 
 #Plot of Model of Residuals against fitted 
-
 #Old school way of looking at model
 summary(my_proposed_bw_model1)
 summary(my_proposed_bw_model1)$coef
@@ -379,52 +378,17 @@ my_proposed_bw_model1 |>
   broom::tidy() |> 
   dplyr::select(term, estimate, p.value) |> 
   knitr::kable(digits = 3)
-
-
-modelr::add_residuals(birthweight_cleaned, my_proposed_bw_model1)
-modelr::add_predictions(birthweight_cleaned, my_proposed_bw_model1)
   
-  
-  birthweight_cleaned |> 
+#Plot of Fitted regressed on Residuals 
+birthweight_cleaned|>
   modelr::add_residuals(my_proposed_bw_model1) |> 
-  ggplot(aes(x = parity, y = resid)) + geom_violin()
-  
-  birthweight_cleaned |> 
-  modelr::add_residuals(my_proposed_bw_model1) |> 
-  ggplot(aes(x = mrace, y = resid)) + geom_violin()
-    
-    
-  birthweight_cleaned |> 
-  modelr::add_residuals(my_proposed_bw_model1) |> 
-  ggplot(aes(x = parity, y = resid)) + geom_violin()
-      
-      
-  birthweight_cleaned |> 
-  modelr::add_residuals(my_proposed_bw_model1) |> 
-  ggplot(aes(x = parity, y = resid)) + geom_violin()
+  modelr::add_predictions(my_proposed_bw_model1) |> 
+  ggplot(aes(x = pred, y = resid)) + 
+  geom_point() + 
+  labs(title = "Residuals vs Fitted values",
+       x = "Fitted values",
+       y = "Residuals")
 
-# Assuming 'your_model' is your linear regression model
-# Assuming 'your_data' is your dataset used to fit the model
-
-library(ggplot2)
-library(broom)
-
-# # Generate predictions and residuals
-# predictions <- predict(your_model, newdata = your_data)
-# residuals <- residuals(your_model)
-# 
-# # Combine predictions and residuals in a data frame
-# plot_data <- data.frame(.fitted = predictions, .resid = resids)
-# 
-# # Create the plot
-# final_plot = ggplot(plot_data, aes(x = .fitted, y = .resid)) +
-#   geom_point() +
-#   geom_smooth(se = FALSE, method = "loess", color = "red") +
-#   labs(title = "Residuals vs. Fitted Values",
-#        x = "Fitted Values",
-#        y = "Residuals")
-# 
-# final_plot
 
 ```
 
@@ -436,7 +400,7 @@ Compare your model (Model 1) to two others (Model 2 and Model 3 below) :
 **Model 2:** One using length at birth and gestational age as predictors (main effects only).
 
 ```{r}
-comparison_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
+comparision_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
 ```
 
 
@@ -445,13 +409,56 @@ comparison_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
 comparision_model_3= lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex +blength*babysex + bhead*blength*babysex, data =  birthweight_cleaned)
 ```
 
+**Cross Validation**
 Make this comparison in terms of the cross-validated prediction error; use `crossv_mc` and functions in purrr as appropriate.
 Note that although we expect your model to be reasonable, model building itself is not a main idea of the course and we don’t necessarily expect your model to be “optimal”.
 
 ```{r}
-# purrr::crossv_mc ()
+#Creating Cross Validation for Models 
+cv_df = 
+  crossv_mc(birthweight_cleaned, 100) 
+
+cv_df =
+  cv_df |> 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
 
 
+cv_df <- 
+  cv_df |> 
+  dplyr::mutate(
+    myproposal_model  = map(train, \(df) lm(bwt ~ mrace + momage + parity + gaweeks + smoken, data = df)),
+    second_model      = map(train, \(df) lm(bwt ~ blength + gaweeks, data = df)),
+    third_model       = map(train, \(df) lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex + blength*babysex + bhead*blength*babysex, data = df))
+  ) |> 
+  dplyr::mutate(
+    rmse_myproposal = map2_dbl(myproposal_model, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_second      = map2_dbl(second_model, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_third       = map2_dbl(third_model, test, \(mod, df) rmse(model = mod, data = df))
+  )
+
+
+# Producing Final Corss-Validated Models 
+# Displaying Plot of RMSE of 3 Cross-Validated Models 
+cv_df |> 
+   dplyr::select(starts_with("rmse")) |> 
+   pivot_longer(
+              everything(),
+              names_to = "model", 
+              values_to = "rmse",
+              names_prefix = "rmse_") |> 
+    dplyr::mutate(model = fct_inorder(model)) |> 
+    ggplot(aes(x = model, y = rmse)) + geom_violin()
+
+
+
+
+
+
+########################
+### END OF PROBLEM 3####
+########################
 ```
 
 
