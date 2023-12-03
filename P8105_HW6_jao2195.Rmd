@@ -282,15 +282,81 @@ if (any_NA) {
 **Model 1:** Propose a regression model for birthweight. 
 
 This model may be based on a hypothesized structure for the factors that underly birthweight, on a data-driven model-building process, or a combination of the two. 
+(I chose to build model based on a hypothesized structure for the factors that underly birthweight in Model 1, below.)
 
 Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot.
 
 ```{r}
 #My Proposed Birthweight Model: 
-my_proposed_bw_model1 = lm(bwt ~ mrace + parity + gaweeks + smoken + momage,  data = birthweight_cleaned)
-
+my_proposed_bw_model1 = lm(bwt ~ mrace + parity + gaweeks + smoken + momage, data = birthweight_cleaned)
 
 #Plot of Model of Residuals against fitted 
+
+#Old school way of looking at model
+summary(my_proposed_bw_model1)
+summary(my_proposed_bw_model1)$coef
+coef(my_proposed_bw_model1)
+fitted.values(my_proposed_bw_model1)
+
+#New School way of looking at model
+my_proposed_bw_model1 |> 
+  broom::glance() 
+
+my_proposed_bw_model1 |> 
+  broom::tidy() 
+ 
+#Making simplified table of estimates and coefficients. 
+my_proposed_bw_model1 |> 
+  broom::tidy() |> 
+  dplyr::select(term, estimate, p.value) |> 
+  knitr::kable(digits = 3)
+
+
+modelr::add_residuals(birthweight_cleaned, my_proposed_bw_model1)
+modelr::add_predictions(birthweight_cleaned, my_proposed_bw_model1)
+  
+  
+  birthweight_cleaned |> 
+  modelr::add_residuals(my_proposed_bw_model1) |> 
+  ggplot(aes(x = parity, y = resid)) + geom_violin()
+  
+  birthweight_cleaned |> 
+  modelr::add_residuals(my_proposed_bw_model1) |> 
+  ggplot(aes(x = mrace, y = resid)) + geom_violin()
+    
+    
+  birthweight_cleaned |> 
+  modelr::add_residuals(my_proposed_bw_model1) |> 
+  ggplot(aes(x = parity, y = resid)) + geom_violin()
+      
+      
+  birthweight_cleaned |> 
+  modelr::add_residuals(my_proposed_bw_model1) |> 
+  ggplot(aes(x = parity, y = resid)) + geom_violin()
+
+# Assuming 'your_model' is your linear regression model
+# Assuming 'your_data' is your dataset used to fit the model
+
+library(ggplot2)
+library(broom)
+
+# # Generate predictions and residuals
+# predictions <- predict(your_model, newdata = your_data)
+# residuals <- residuals(your_model)
+
+# Combine predictions and residuals in a data frame
+plot_data <- data.frame(.fitted = predictions, .resid = resids)
+
+# Create the plot
+final_plot = ggplot(plot_data, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_smooth(se = FALSE, method = "loess", color = "red") +
+  labs(title = "Residuals vs. Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals")
+
+final_plot
+
 ```
 
 **### Description of Modeling Process**
@@ -310,10 +376,12 @@ comparison_model_2= lm( bwt ~ blength + gaweeks, data = birthweight_cleaned)
 comparision_model_3= lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex +blength*babysex + bhead*blength*babysex, data =  birthweight_cleaned)
 ```
 
-Make this comparison in terms of the cross-validated prediction error; use crossv_mc and functions in purrr as appropriate.
+Make this comparison in terms of the cross-validated prediction error; use `crossv_mc` and functions in purrr as appropriate.
 Note that although we expect your model to be reasonable, model building itself is not a main idea of the course and we don’t necessarily expect your model to be “optimal”.
 
 ```{r}
+purrr::crossv_mc ()
+
 
 ```
 
